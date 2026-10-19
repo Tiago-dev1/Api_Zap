@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Blue - Painel do Aluno SENAI</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0084FF',
+                            600: '#1B72E8',
+                            700: '#0052cc',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background-color: #F0F4F9; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center bg-[#F0F4F9] text-slate-800 p-4">
+
+    <div class="fixed top-0 left-0 w-full h-40 bg-gradient-to-r from-brand-600 to-brand-500 z-0 shadow-md"></div>
+
+    <div class="relative z-10 w-full max-w-md my-auto pt-6 pb-6">
+        
+        <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-8">
+            
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-2 text-brand-500">
+                    <i class="fa-brands fa-whatsapp text-3xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-900">WhatsApp Blue</h1>
+                <p class="text-xs text-slate-500 mt-1">Laboratório Prático de Integração API</p>
+            </div>
+
+            <!-- Navegação por Abas -->
+            <div class="flex border-b border-slate-200 mb-6 text-xs font-bold text-center">
+                <button id="tabLoginBtn" onclick="switchTab('login')" class="flex-1 py-2 border-b-2 border-brand-500 text-brand-600">
+                    1. Login (/auth)
+                </button>
+                <button id="tabRegBtn" onclick="switchTab('registro')" class="flex-1 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600">
+                    2. Registro (/registrar)
+                </button>
+                <button id="tabChatBtn" onclick="switchTab('chat')" class="flex-1 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-600">
+                    3. Chat (/chat)
+                </button>
+            </div>
+
+            <!-- ---------------------------------------------------- -->
+            <!-- EXERCÍCIO EXTRA: FORMULÁRIO DE LOGIN -->
+            <!-- ---------------------------------------------------- -->
+            <form id="loginForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Telefone</label>
+                    <input type="tel" id="phoneInput" placeholder="(18) 99999-9999" required oninput="maskPhone(this)"
+                        class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Senha</label>
+                    <input type="password" id="passwordInput" placeholder="Sua senha" required
+                        class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <button type="submit" id="submitBtn" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm rounded-xl shadow transition">
+                    Entrar (Query Params)
+                </button>
+            </form>
+
+            <!-- ---------------------------------------------------- -->
+            <!-- MISSÃO 1: REGISTRAR UM NOVO UTILIZADOR -->
+            <!-- ---------------------------------------------------- -->
+            <form id="formularioRegistro" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Apelido</label>
+                    <input type="text" id="regApelido" placeholder="Ex: João Silva" required
+                        class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Senha</label>
+                    <input type="password" id="regSenha" placeholder="Crie uma senha" required
+                        class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Telefone</label>
+                    <input type="tel" id="regTelefone" placeholder="(18) 99999-9999" required oninput="maskPhone(this)"
+                        class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <button type="button" onclick="realizarRegistro()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow transition">
+                    Criar Conta (FormData)
+                </button>
+            </form>
+
+            <!-- ---------------------------------------------------- -->
+            <!-- MISSÃO 2: ENVIAR MENSAGEM -->
+            <!-- ---------------------------------------------------- -->
+            <div id="areaMensagens" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Telefone do Destinatário</label>
+                    <input type="tel" id="destinatario" placeholder="(18) 98888-8888" oninput="maskPhone(this)"
+                        class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Mensagem</label>
+                    <input type="text" id="textoMensagem" placeholder="Escreva sua mensagem..."
+                        class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+                <button type="button" onclick="enviarMensagem()" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm rounded-xl shadow transition">
+                    Enviar Mensagem (JSON)
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 hidden px-4 py-3 bg-slate-900 text-white rounded-2xl shadow-xl text-xs font-medium">
+        <span id="toastMsg">Notificação</span>
+    </div>
+
+    <script>
+        // Mascara de telefone
+        function maskPhone(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+
+            if (value.length > 6) {
+                input.value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
+            } else if (value.length > 2) {
+                input.value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+            } else if (value.length > 0) {
+                input.value = `(${value}`;
+            } else {
+                input.value = '';
+            }
+        }
+
+        // Alternador de Abas da Interface
+        function switchTab(tab) {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('formularioRegistro').classList.add('hidden');
+            document.getElementById('areaMensagens').classList.add('hidden');
+
+            document.getElementById('tabLoginBtn').className = "flex-1 py-2 border-b-2 border-transparent text-slate-400";
+            document.getElementById('tabRegBtn').className = "flex-1 py-2 border-b-2 border-transparent text-slate-400";
+            document.getElementById('tabChatBtn').className = "flex-1 py-2 border-b-2 border-transparent text-slate-400";
+
+            if (tab === 'login') {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('tabLoginBtn').className = "flex-1 py-2 border-b-2 border-brand-500 text-brand-600 font-bold";
+            } else if (tab === 'registro') {
+                document.getElementById('formularioRegistro').classList.remove('hidden');
+                document.getElementById('tabRegBtn').className = "flex-1 py-2 border-b-2 border-emerald-500 text-emerald-600 font-bold";
+            } else if (tab === 'chat') {
+                document.getElementById('areaMensagens').classList.remove('hidden');
+                document.getElementById('tabChatBtn').className = "flex-1 py-2 border-b-2 border-brand-500 text-brand-600 font-bold";
+            }
+        }
+
+        // Toast de aviso
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3500);
+        }
+
+        // =======================================================
+        // EXERCÍCIO EXTRA: Realizar Login usando Query Parameters
+        // =======================================================
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const rawPhone = document.getElementById('phoneInput').value;
+            const senha = document.getElementById('passwordInput').value;
+
+            // Remove a máscara mantendo apenas os números
+            const telefone = rawPhone.replace(/\D/g, '');
+
+            try {
+                // Rota POST com Query Parameters na URL conforme solicitado
+                const url = `http://localhost:3000/auth?telefone=${encodeURIComponent(telefone)}&senha=${encodeURIComponent(senha)}`;
+                
+                const response = await fetch(url, { method: 'POST' });
+                const data = await response.json();
+
+                if (response.ok && data.isAuth) {
+                    showToast('Sucesso: ' + data.mensagem);
+                    // Salva telefone para uso posterior no chat
+                    localStorage.setItem('meuTelefone', telefone);
+                    localStorage.setItem('minhaSenha', senha);
+                } else {
+                    showToast('Atenção: ' + data.mensagem);
+                }
+            } catch (error) {
+                console.error("Erro na comunicação:", error);
+                showToast("Erro ao conectar com a API.");
+            }
+        }
+
+        // =======================================================
+        // MISSÃO 1: Registrar um Novo Utilizador (FormData)
+        // =======================================================
+        async function realizarRegistro() {
+            const apelido = document.getElementById('regApelido').value;
+            const senha = document.getElementById('regSenha').value;
+            const rawTelefone = document.getElementById('regTelefone').value;
+
+            // Limpa a máscara do telefone
+            const telefone = rawTelefone.replace(/\D/g, '');
+
+            if (!apelido || !senha || !telefone) {
+                showToast("Preencha todos os campos do registro!");
+                return;
+            }
+
+            // Empacota os dados no formato FormData
+            const formData = new FormData();
+            formData.append('apelido', apelido);
+            formData.append('senha', senha);
+            formData.append('telefone', telefone);
+
+            try {
+                const resposta = await fetch('http://localhost:3000/registrar', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const dados = await resposta.json();
+
+                if (resposta.ok) {
+                    showToast('Sucesso: ' + dados.mensagem);
+                } else {
+                    showToast('Atenção: ' + dados.mensagem);
+                }
+            } catch (erro) {
+                console.error('Erro de comunicação:', erro);
+                showToast('Falha ao conectar com o servidor da API.');
+            }
+        }
+
+        // =======================================================
+        // MISSÃO 2: Enviar Mensagem (Query Params + JSON Body)
+        // =======================================================
+        async function enviarMensagem() {
+            const rawDestino = document.getElementById('destinatario').value;
+            const mensagem = document.getElementById('textoMensagem').value;
+
+            const telefoneDestino = rawDestino.replace(/\D/g, '');
+
+            // Recupera credenciais salvas no login ou usa dados padrão para teste
+            const meuTelefone = localStorage.getItem('meuTelefone') || '5518999999999';
+            const minhaSenha = localStorage.getItem('minhaSenha') || '5f4dcc3b5aa765d61d8327deb882cf99';
+
+            const dadosMensagem = {
+                telefone: telefoneDestino,
+                mensagem: mensagem
+            };
+
+            try {
+                const url = `http://localhost:3000/chat?telefone=${meuTelefone}&senha=${minhaSenha}`;
+
+                const resposta = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dadosMensagem)
+                });
+
+                const dadosRetorno = await resposta.json();
+
+                if (resposta.ok) {
+                    showToast('Status: ' + dadosRetorno.mensagem);
+                    document.getElementById('textoMensagem').value = '';
+                } else {
+                    showToast('Falha: ' + dadosRetorno.mensagem);
+                }
+            } catch (erro) {
+                console.error('Erro na requisição:', erro);
+                showToast('Erro ao conectar com a API.');
+            }
+        }
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>
